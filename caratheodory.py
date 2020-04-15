@@ -2,7 +2,14 @@ import numpy as np
 from scipy.linalg import null_space
 
 
-def _calculate_weighted_mean(P : list, u):
+def index_of_point(l, point):
+    for i, p in enumerate(l):
+        if np.all(p == point):
+            return i
+    raise ValueError("Cannot find {} inside {}".format(point, l))
+
+
+def _calculate_weighted_mean(P: list, u):
     weight = 0.
     for i in range(len(P)):
         weight += u[i] * P[i]
@@ -55,7 +62,7 @@ def caratheodory(P: list, u):
     return S, w
 
 
-def fast_cartheodory(P, u, k):
+def fast_caratheodory(P, u, k):
     """
     Performs caratheodory theorem (naively) on the input
     :param P: list of n points in R^d
@@ -63,6 +70,7 @@ def fast_cartheodory(P, u, k):
               will contain the correct value of the ith point in P, in the ith place.
     :return: A caratheodory set (S,w)
     :note: Running time: O(n^2d^2)
+    :note: we assume the points are unique
     """
     n = len(P)
     if n == 0:
@@ -73,7 +81,28 @@ def fast_cartheodory(P, u, k):
     if k > n or k < 1:
         raise ValueError("Error: k needs to be between 1 and n")
 
-    partitions = np.array_split(P, n // k)
-    partitions_weights = []
-    for i in range(k):
-        partitions_weights.append()
+    partition_indices = np.array_split(range(n), k)
+    u_tag = []
+    mus = []
+    for indices in partition_indices:
+        new_weight = 0.
+        new_point = np.zeros(d)
+        for i in indices:
+            new_weight += u[i]
+            new_point += P[i] * u[i]
+        mus.append(new_point / new_weight)
+        u_tag.append(new_weight)
+    (mu_tilde, w_tilde) = caratheodory(mus, u_tag)
+
+    C = []
+    w = []
+    for mu_tilde_i, mu in enumerate(mu_tilde):
+        mu_i = index_of_point(mus, mu)
+        weight_denominator = 0.
+        for index in partition_indices[mu_i]:
+            weight_denominator += u[index]
+        for index in partition_indices[mu_i]:
+            C.append(P[index])
+            w.append(w_tilde[mu_tilde_i] * u[index] / weight_denominator)
+
+    return fast_caratheodory(C, w, k)
