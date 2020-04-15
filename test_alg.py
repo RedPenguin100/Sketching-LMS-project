@@ -1,7 +1,7 @@
 import pytest
 from pytest import approx
 
-from caratheodory import caratheodory, _calculate_weighted_mean, fast_caratheodory
+from caratheodory import caratheodory, _calculate_weighted_mean, fast_caratheodory, caratheodory_matrix
 import numpy as np
 
 
@@ -51,3 +51,15 @@ def test_fast_caratheodory():
     for i in range(len(S)):
         actual_weighted_mean += w[i] * S[i]
     assert 0 == approx(np.linalg.norm(actual_weighted_mean - expected_weighted_mean))
+
+
+def test_caratheodory_matrix():
+    A = np.array([[0, 1], [0, 0], [1, 1], [1, 0],
+                  [-1, 0]
+                  # , [-1, 1], [0, -1], [1, -1]
+                  ])
+    (n, d) = A.shape
+    S = caratheodory_matrix(A, 3)
+
+    assert S.shape == (np.power(d, 2) + 1, d)
+    assert np.linalg.norm(np.matmul(S.transpose(), S) - np.matmul(A.transpose(), A)) == 0

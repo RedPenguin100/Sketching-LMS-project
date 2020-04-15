@@ -64,12 +64,13 @@ def caratheodory(P: list, u):
 
 def fast_caratheodory(P, u, k):
     """
-    Performs caratheodory theorem (naively) on the input
+    Returns a smaller weighted set as described in caratheodory theorem,
+    using a fast algorithm O(nd).
     :param P: list of n points in R^d
     :param u: a list that represents a function that maps each point in P to a positive real value.
               will contain the correct value of the ith point in P, in the ith place.
+    :param k: an integer between 1 and n for accuracy / speed trade-off.
     :return: A caratheodory set (S,w)
-    :note: Running time: O(n^2d^2)
     :note: we assume the points are unique
     """
     n = len(P)
@@ -106,3 +107,36 @@ def fast_caratheodory(P, u, k):
             w.append(w_tilde[mu_tilde_i] * u[index] / weight_denominator)
 
     return fast_caratheodory(C, w, k)
+
+
+def caratheodory_matrix(A, k):
+    """
+    Performs algorithm 3 as described in the article, receiving data
+    and returning a manipulated "compressed" data.
+    :param A: matrix of dimensions n * d
+    :param k: accuracy / speed trade-off, integer from 1 to n
+    :return: A matrix S of dimensions (d ^ 2 + 1) * d and
+             A^t A == S^t S
+    """
+    if len(A.shape) != 2:
+        raise ValueError("Expected A to be matrix, got A with shape: {}".format(A.shape))
+
+    (n, d) = A.shape
+
+    P = []
+    u = []
+    for i in range(n):
+        a = A[i]
+        a.resize(d, 1)
+        u.append(1 / n)
+        p_i = np.matmul(a, a.transpose())
+        p_i.resize(d * d)
+        P.append(p_i)
+    (C, w) = fast_caratheodory(P, u, k)
+    S = np.zeros((np.power(d, 2) + 1, d))
+    for i in range(np.power(d, 2) + 1):
+        p = C[i]
+        index_in_P = index_of_point(P, p)
+        S[i] = np.sqrt(n * w[i]) * A[index_in_P]
+
+    return S
