@@ -63,3 +63,12 @@ def test_caratheodory_matrix():
 
     assert S.shape == (np.power(d, 2) + 1, d)
     assert np.linalg.norm(np.matmul(S.transpose(), S) - np.matmul(A.transpose(), A)) == 0
+
+
+def test_lms_coreset():
+    A = np.array([[0, 1], [0, 0], [1, 1], [1, 0],
+                  [-1, 0], [2, 0], [3, 0], [4, 0],
+                  [0, 2], [0, 3], [0, 4], [0, 5]
+                  ])
+    b = np.array([-1, -1, 1, 1, 0, 2, 4, 5, 1, 2, 3, 4])
+    C, y = lms_coreset(A, b, m=2, k=4)
