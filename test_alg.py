@@ -72,3 +72,13 @@ def test_lms_coreset():
                   ])
     b = np.array([-1, -1, 1, 1, 0, 2, 4, 5, 1, 2, 3, 4])
     C, y = lms_coreset(A, b, m=2, k=4)
+
+
+def test_lms_coreset_bad_k_value():
+    A = np.array([[0, 1], [0, 0], [1, 1], [1, 0],
+                  [-1, 0], [2, 0], [3, 0], [4, 0],
+                  [0, 2], [0, 3], [0, 4], [0, 5]
+                  ])
+    b = np.array([-1, -1, 1, 1, 0, 2, 4, 5, 1, 2, 3, 4])
+    with pytest.raises(ValueError):
+        C, y = lms_coreset(A, b, m=2, k=2)

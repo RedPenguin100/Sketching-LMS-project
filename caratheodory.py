@@ -120,8 +120,9 @@ def caratheodory_matrix(A, k):
     """
     if len(A.shape) != 2:
         raise ValueError("Expected A to be matrix, got A with shape: {}".format(A.shape))
-
     (n, d) = A.shape
+    if k < d + 2:
+        raise ValueError("k should be larger or equal to d + 2")
 
     P = []
     u = []
