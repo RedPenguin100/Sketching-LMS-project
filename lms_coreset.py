@@ -13,13 +13,7 @@ def lms_coreset(A, b, m, k):
     :return:
     """
     (n, d) = A.shape
-    A_tag = np.zeros((n, d + 1))
-    # A' = (A | b)
-    for i in range(n):
-        for j in range(d):
-            A_tag[i][j] = A[i][j]
-    for i in range(n):
-        A_tag[i][d] = b[i]
+    A_tag = np.concatenate((A, b.reshape(n, 1)), axis=1)
     A_block_list = np.array_split(A_tag, m)  # Each block with size at most n // m + 1
     S_list = []
     for block in A_block_list:
