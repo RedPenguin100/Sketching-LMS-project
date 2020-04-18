@@ -4,6 +4,8 @@ from pytest import approx
 from caratheodory import caratheodory, _calculate_weighted_mean, fast_caratheodory, caratheodory_matrix
 import numpy as np
 
+from lms_coreset import lms_coreset
+
 
 def index_of_for_points(l, point):
     for i in range(len(l)):
@@ -59,7 +61,7 @@ def test_caratheodory_matrix():
                   # , [-1, 1], [0, -1], [1, -1]
                   ])
     (n, d) = A.shape
-    S = caratheodory_matrix(A, 3)
+    S = caratheodory_matrix(A, k=3)
 
     assert S.shape == (np.power(d, 2) + 1, d)
     assert np.linalg.norm(np.matmul(S.transpose(), S) - np.matmul(A.transpose(), A)) == 0
