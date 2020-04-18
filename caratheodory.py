@@ -106,6 +106,8 @@ def fast_caratheodory(P, u, k):
             C.append(P[index])
             w.append(w_tilde[mu_tilde_i] * u[index] / weight_denominator)
 
+    if len(C) == len(P):
+        raise RecursionError("Heading to infinite recursion")
     return fast_caratheodory(C, w, k)
 
 
@@ -117,6 +119,7 @@ def caratheodory_matrix(A, k):
     :param k: accuracy / speed trade-off, integer from 1 to n
     :return: A matrix S of dimensions (d ^ 2 + 1) * d and
              A^t A == S^t S
+    # TODO: implement / handle case where d^2+1 > n
     """
     if len(A.shape) != 2:
         raise ValueError("Expected A to be matrix, got A with shape: {}".format(A.shape))
@@ -135,7 +138,10 @@ def caratheodory_matrix(A, k):
         P.append(p_i)
     (C, w) = fast_caratheodory(P, u, k)
     S = np.zeros((np.power(d, 2) + 1, d))
-    for i in range(np.power(d, 2) + 1):
+    minimum = np.min([np.power(d, 2) + 1, n])
+    if minimum == n:
+        print("d^2 + 1 is not smaller than n")
+    for i in range(minimum):
         p = C[i]
         index_in_P = index_of_point(P, p)
         S[i] = np.sqrt(n * w[i]) * A[index_in_P]
