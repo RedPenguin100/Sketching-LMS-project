@@ -7,13 +7,6 @@ import numpy as np
 from lms_coreset import lms_coreset
 
 
-def index_of_for_points(l, point):
-    for i in range(len(l)):
-        if np.all(l[i] == point):
-            return i
-    raise ValueError("Point: {} does not exist in {} !".format(point, l))
-
-
 def test_caratheodory():
     d = 2
 
