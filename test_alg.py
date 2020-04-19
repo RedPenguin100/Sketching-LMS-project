@@ -61,10 +61,11 @@ def test_caratheodory_matrix():
                   # , [-1, 1], [0, -1], [1, -1]
                   ])
     (n, d) = A.shape
-    S = caratheodory_matrix(A, k=3)
+    S = caratheodory_matrix(A, k=4)
 
     assert S.shape == (np.power(d, 2) + 1, d)
     assert np.linalg.norm(np.matmul(S.transpose(), S) - np.matmul(A.transpose(), A)) == 0
+
 
 # TODO: add better test for lms_coreset
 def test_lms_coreset():
@@ -73,7 +74,7 @@ def test_lms_coreset():
                   [0, 2], [0, 3], [0, 4], [0, 5]
                   ])
     b = np.array([-1, -1, 1, 1, 0, 2, 4, 5, 1, 2, 3, 4])
-    C, y = lms_coreset(A, b, m=2, k=4)
+    C, y = lms_coreset(A, b, m=2, k=5)
 
 
 def test_lms_coreset_bad_k_value():
