@@ -69,6 +69,16 @@ def caratheodory(P: list, u):
     return S, w
 
 
+def get_mus_utag(P_partitions, u_partitions):
+    u_tag = []
+    mus = []
+    for p_partition, u_partition in zip(P_partitions, u_partitions):
+        new_weight, new_point = sum(u_partition), sum(np.multiply(p_partition.T, u_partition).T)
+        mus.append(new_point / new_weight)
+        u_tag.append(new_weight)
+    return mus, u_tag
+
+
 def fast_caratheodory(P, u, k):
     """
     Returns a smaller weighted set as described in caratheodory theorem,
@@ -90,18 +100,11 @@ def fast_caratheodory(P, u, k):
         k = n
     if k < 1:
         raise ValueError()
-
     partition_indices = np.array_split(range(n), k)
-    u_tag = []
-    mus = []
-    for indices in partition_indices:
-        new_weight = 0.
-        new_point = np.empty(d)
-        for i in indices:
-            new_weight += u[i]
-            new_point += P[i] * u[i]
-        mus.append(new_point / new_weight)
-        u_tag.append(new_weight)
+    p_partition = np.array_split(P, k)
+    u_partition = np.array_split(u, k)
+
+    mus, u_tag = get_mus_utag(p_partition, u_partition)
     (mu_tilde, w_tilde) = caratheodory(mus, u_tag)
 
     C = []
