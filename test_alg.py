@@ -4,6 +4,7 @@ from pytest import approx
 from caratheodory import caratheodory, _calculate_weighted_mean, fast_caratheodory, caratheodory_matrix
 import numpy as np
 
+from data_generator import get_dummy_data
 from lms_coreset import lms_coreset
 
 
@@ -78,3 +79,21 @@ def test_lms_coreset_bad_k_value():
     b = np.array([-1, -1, 1, 1, 0, 2, 4, 5, 1, 2, 3, 4])
     with pytest.raises(ValueError):
         C, y = lms_coreset(A, b, m=2, k=2)
+
+
+import sys
+
+sys.setrecursionlimit(1000000)
+
+
+def test_lms_generated_data():
+    """
+    Sometimes fails due to numerical instability.
+    """
+    A, b = get_dummy_data()
+    print("Done generating")
+    (n, d) = A.shape
+    C, y = lms_coreset(A, b, m=1, k=100)
+    x = np.linalg.lstsq(A, b)[0]
+    x_fast = np.linalg.lstsq(C, y)[0]
+    assert approx(x_fast[0], abs=1e-4) == x[0]
