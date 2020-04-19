@@ -139,16 +139,8 @@ def caratheodory_matrix(A, k):
     (n, d) = A.shape
     if k < d + 2:
         raise ValueError("k should be larger or equal to d + 2")
-
-    P = []
-    u = []
-    for i in range(n):
-        a = A[i]
-        a.resize(d, 1)
-        u.append(1 / n)
-        p_i = np.matmul(a, a.transpose())
-        p_i.resize(d * d)
-        P.append(p_i)
+    P = np.matmul(A.reshape(n, d, 1), A.reshape(n, 1, d)).reshape((n, np.power(d, 2)))
+    u = np.ones(n) * (1 / n)
     (C, w) = fast_caratheodory(P, u, k)
     S = np.empty((np.power(d, 2) + 1, d))
     minimum = np.min([np.power(d, 2) + 1, n])
