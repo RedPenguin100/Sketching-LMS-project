@@ -2,9 +2,16 @@ import numpy as np
 from scipy.linalg import null_space
 
 
-def index_of_point(l, point):
-    for i, p in enumerate(l):
-        if np.all(p == point):
+def _fast_all(p1, p2):
+    for i in range(len(p1)):
+        if p1[i] != p2[i]:
+            return False
+    return True
+
+
+def index_of_point(l, point, prev_index=0):
+    for i in range(prev_index, len(l)):
+        if _fast_all(l[i], point):
             return i
     raise ValueError("Cannot find {} inside {}".format(point, l))
 
@@ -99,8 +106,9 @@ def fast_caratheodory(P, u, k):
 
     C = []
     w = []
+    mu_i = 0
     for mu_tilde_i, mu in enumerate(mu_tilde):
-        mu_i = index_of_point(mus, mu)
+        mu_i = index_of_point(mus, mu, prev_index=mu_i)
         weight_denominator = 0.
         for index in partition_indices[mu_i]:
             weight_denominator += u[index]
@@ -143,9 +151,12 @@ def caratheodory_matrix(A, k):
     minimum = np.min([np.power(d, 2) + 1, n])
     if minimum == n:
         print("d^2 + 1 is not smaller than n")
+
+    # Note: PERFORMANCE
+    index_in_P = 0
     for i in range(minimum):
         p = C[i]
-        index_in_P = index_of_point(P, p)
+        index_in_P = index_of_point(P, p, prev_index=index_in_P)
         S[i] = np.sqrt(n * w[i]) * A[index_in_P]
 
     return S
