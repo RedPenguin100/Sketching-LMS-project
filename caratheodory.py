@@ -23,6 +23,50 @@ def _calculate_weighted_mean(P: list, u):
     return weight
 
 
+def _calc_a_mat(n, d, P):
+    A_mat = np.empty((d, n - 1))
+    for i in range(n - 1):
+        A_mat[:, i] = P[i + 1] - P[0]  # I update A and calculate a_i at the same time, for efficiency.
+    return A_mat
+
+
+def _calc_alpha(u, v, n):
+    alpha = np.inf
+    for i in range(n):
+        if v[i] <= 0:
+            continue
+        alpha = min(alpha, u[i] / v[i])
+    return alpha
+
+
+def _calc_w(alpha, n, u, v):
+    w = []
+    for i in range(n):
+        w.append(u[i] - alpha * v[i])
+    return w
+
+
+def _calc_S(n, w, P):
+    S = []
+    for i in range(n):
+        if w[i] > 0:
+            S.append(P[i])
+    return S
+
+
+def _remove_w_zeros(w):
+    w_zeros = w.count(0.)
+    for j in range(w_zeros):
+        w.remove(0.)
+
+
+def _calc_v(almost_v, n):
+    v = np.empty(n)
+    v[0] = -sum(almost_v)
+    v[1:] = almost_v
+    return v
+
+
 def caratheodory(P: list, u):
     """
     Returns a smaller weighted set as described in caratheodory theorem.
@@ -38,37 +82,26 @@ def caratheodory(P: list, u):
     d = len(P[0])
     if n <= d + 1:
         return P, u
-    A_mat = np.empty((d, n - 1))
-    for i in range(n - 1):
-        A_mat[:, i] = P[i + 1] - P[0]  # I update A and calculate a_i at the same time, for efficiency.
-
+    A_mat = _calc_a_mat(n, d, P)
     # Find v
     almost_v = null_space(A_mat)[:, 0]  # Get the first vector from the null_space.
-    v = np.empty(n)
-    v[0] = -sum(almost_v)
-    v[1:] = almost_v
-
-    alpha = np.inf
-    for i in range(n):
-        if v[i] <= 0:
-            continue
-        alpha = min(alpha, u[i] / v[i])
-    w = []
-    for i in range(n):
-        w.append(u[i] - alpha * v[i])
-
-    S = []
-    for i in range(n):
-        if w[i] > 0:
-            S.append(P[i])
-    w_zeros = w.count(0.)
-    for j in range(w_zeros):
-        w.remove(0.)
+    v = _calc_v(almost_v, n)
+    alpha = _calc_alpha(u, v, n)
+    w = _calc_w(alpha, n, u, v)
+    S = _calc_S(n, w, P)
+    _remove_w_zeros(w)
     if len(S) > d + 1:
         return caratheodory(S, w)
     return S, w
 
 
+# def get_mus_utag(P_partitions, u_partitions):
+#     P_partitions1 = np.array(P_partitions, dtype=object).T
+#     u_partitions1 = np.array(u_partitions)
+#     u_tag = np.array([np.sum(part) for part in u_partitions1.squeeze()])
+#     mul = np.multiply(P_partitions1, np.array([u_partitions1.T])).T
+#     points = np.array([sum(part) for part in mul.squeeze()])
+#     return np.divide(points.T, u_tag).T.squeeze(), u_tag.T.squeeze()
 def get_mus_utag(P_partitions, u_partitions):
     u_tag = []
     mus = []
@@ -96,10 +129,12 @@ def fast_caratheodory(P, u, k):
     d = len(P[0])
     if n <= d + 1:
         return P, u
-    if k > n:  # TODO: decide on the best way to fix this. 
+    if k > n:  # TODO: decide on the best way to fix this.
         k = n
     if k < 1:
         raise ValueError()
+    if k == n:
+        return caratheodory(P, u)  # Exactly the same in that case.
     partition_indices = np.array_split(range(n), k)
     p_partition = np.array_split(P, k)
     u_partition = np.array_split(u, k)
