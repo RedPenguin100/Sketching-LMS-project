@@ -31,13 +31,13 @@ def caratheodory(P: list, u):
     d = len(P[0])
     if n <= d + 1:
         return P, u
-    A_mat = np.zeros((d, n - 1))
+    A_mat = np.empty((d, n - 1))
     for i in range(n - 1):
         A_mat[:, i] = P[i + 1] - P[0]  # I update A and calculate a_i at the same time, for efficiency.
 
     # Find v
     almost_v = null_space(A_mat)[:, 0]  # Get the first vector from the null_space.
-    v = np.zeros(n)
+    v = np.empty(n)
     v[0] = -sum(almost_v)
     v[1:] = almost_v
 
@@ -89,7 +89,7 @@ def fast_caratheodory(P, u, k):
     mus = []
     for indices in partition_indices:
         new_weight = 0.
-        new_point = np.zeros(d)
+        new_point = np.empty(d)
         for i in indices:
             new_weight += u[i]
             new_point += P[i] * u[i]
@@ -139,7 +139,7 @@ def caratheodory_matrix(A, k):
         p_i.resize(d * d)
         P.append(p_i)
     (C, w) = fast_caratheodory(P, u, k)
-    S = np.zeros((np.power(d, 2) + 1, d))
+    S = np.empty((np.power(d, 2) + 1, d))
     minimum = np.min([np.power(d, 2) + 1, n])
     if minimum == n:
         print("d^2 + 1 is not smaller than n")
