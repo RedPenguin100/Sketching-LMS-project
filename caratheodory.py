@@ -79,8 +79,10 @@ def fast_caratheodory(P, u, k):
     d = len(P[0])
     if n <= d + 1:
         return P, u
-    if k > n or k < 1:
-        raise ValueError("Error: k needs to be between 1 and n")
+    if k > n:  # TODO: decide on the best way to fix this. 
+        k = n
+    if k < 1:
+        raise ValueError()
 
     partition_indices = np.array_split(range(n), k)
     u_tag = []
