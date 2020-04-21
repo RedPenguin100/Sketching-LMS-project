@@ -95,13 +95,6 @@ def caratheodory(P: list, u):
     return S, w
 
 
-# def get_mus_utag(P_partitions, u_partitions):
-#     P_partitions1 = np.array(P_partitions, dtype=object).T
-#     u_partitions1 = np.array(u_partitions)
-#     u_tag = np.array([np.sum(part) for part in u_partitions1.squeeze()])
-#     mul = np.multiply(P_partitions1, np.array([u_partitions1.T])).T
-#     points = np.array([sum(part) for part in mul.squeeze()])
-#     return np.divide(points.T, u_tag).T.squeeze(), u_tag.T.squeeze()
 def get_mus_utag(P_partitions, u_partitions):
     u_tag = []
     mus = []
@@ -144,9 +137,10 @@ def fast_caratheodory(P, u, k):
 
     C = []
     w = []
-    mu_i = 0
+    # mu_i = 0
     for mu_tilde_i, mu in enumerate(mu_tilde):
-        mu_i = index_of_point(mus, mu, prev_index=mu_i)
+        mu_i = np.where((mus == mu).all(axis=1))[0][0]
+        # mu_i = index_of_point(mus, mu, prev_index=mu_i)
         weight_denominator = 0.
         for index in partition_indices[mu_i]:
             weight_denominator += u[index]
@@ -186,7 +180,8 @@ def caratheodory_matrix(A, k):
     index_in_P = 0
     for i in range(minimum):
         p = C[i]
-        index_in_P = index_of_point(P, p, prev_index=index_in_P)
+        index_in_P = np.where((P == p).all(axis=1))[0]
+
         S[i] = np.sqrt(n * w[i]) * A[index_in_P]
 
     return S
