@@ -190,9 +190,7 @@ def caratheodory_matrix(A, k):
 
         def line1():
             index_in_P = np.where((P == p).all(axis=1))[0]
-            if len(index_in_P) > 1:
-                return index_in_P[0]
-            return index_in_P
+            return index_in_P[0]
 
         index_in_P = line1()
 
