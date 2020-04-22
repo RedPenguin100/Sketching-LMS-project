@@ -96,12 +96,18 @@ def caratheodory(P: list, u):
 
 
 def get_mus_utag(P_partitions, u_partitions):
-    u_tag = []
     mus = []
-    for p_partition, u_partition in zip(P_partitions, u_partitions):
-        new_weight, new_point = sum(u_partition), sum(np.multiply(p_partition.T, u_partition).T)
-        mus.append(new_point / new_weight)
-        u_tag.append(new_weight)
+    u_partitions = np.array(u_partitions)
+    if len(u_partitions.shape) == 2:
+        u_tag = np.apply_along_axis(np.sum, -1, np.array(u_partitions))
+    elif len(u_partitions.shape) == 1:
+        v = np.vectorize(np.sum)
+        u_tag = v(u_partitions)
+    else:
+        raise ValueError("Shape cannot be != 2/1")
+    for i, (p_partition, u_partition) in enumerate(zip(P_partitions, u_partitions)):
+        new_point = np.sum(np.multiply(p_partition, u_partition.reshape(len(u_partition), 1)).T, axis=1)
+        mus.append(new_point / u_tag[i])
     return mus, u_tag
 
 
