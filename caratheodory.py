@@ -23,7 +23,6 @@ def _calculate_weighted_mean(P: list, u):
     return weight
 
 
-
 def _calc_alpha(u, v, n):
     alpha = np.inf
     for i in range(n):
@@ -116,12 +115,14 @@ def fast_caratheodory(P, u, k):
     :note: we assume the points are unique
     """
     n = len(P)
+
     def conversion_from_list_to_np_array(P, u):
         if isinstance(u, list):
             u = np.array(u)
         if isinstance(P, list):
             P = np.array(P)
         return P, u
+
     P, u = conversion_from_list_to_np_array(P, u)
     if n == 0:
         raise ValueError("Error: P cannot be empty")
@@ -134,10 +135,9 @@ def fast_caratheodory(P, u, k):
         raise ValueError()
     if k == n:
         return caratheodory(P, u)  # Exactly the same in that case.
-    partition_indices = np.array_split(range(n), k)
+    partition_indices = np.array_split(np.arange(n), k)
     p_partition = np.array_split(P, k)
     u_partition = np.array_split(u, k)
-
     mus, u_tag = get_mus_utag(p_partition, u_partition)
     (mu_tilde, w_tilde) = caratheodory(mus, u_tag)
 
