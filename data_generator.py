@@ -1,17 +1,14 @@
 import numpy as np
 
 
-def get_b(n):
-    return np.array(range(n))
-
-
 def get_dummy_data():
-    n = 3000000
+    n = 1000000
     A = np.empty((n, 2))
-    b = get_b(n)
+    b = np.arange(n)
     A[:, 0] = b
-    A[:, 1] = np.ones(n)
-    b = b + np.random.uniform(size=n)
-    A[:, 0] = A[:, 0] + np.random.uniform(size=n)
+    A[:, 1] = 1
+    rand = np.random.uniform(size=2 * n)
+    b = b + rand[0:n]
+    A[:, 0] = A[:, 0] + rand[n:]
     b.resize(n, 1)
     return A, b
