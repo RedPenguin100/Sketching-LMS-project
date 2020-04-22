@@ -18,7 +18,7 @@ def test_caratheodory():
     assert approx(sum(u)) == 1, "u values need to sum up to 1"
     expected_weighted_mean = _calculate_weighted_mean(P, u)
 
-    S, w = caratheodory(P, u)
+    S, w = caratheodory(P, u, len(P), len(P[0]))
 
     actual_weighted_mean = 0
     for i in range(len(S)):
@@ -93,7 +93,7 @@ def test_lms_generated_data():
     A, b = get_dummy_data()
     print("Done generating")
     (n, d) = A.shape
-    C, y = lms_coreset(A, b, m=1, k=100)
+    C, y = lms_coreset(A, b, m=1, k=25)
     x = np.linalg.lstsq(A, b)[0]
     x_fast = np.linalg.lstsq(C, y)[0]
     assert approx(x_fast[0], abs=1e-4) == x[0]
