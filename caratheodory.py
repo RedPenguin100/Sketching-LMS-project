@@ -23,12 +23,6 @@ def _calculate_weighted_mean(P: list, u):
     return weight
 
 
-def _calc_a_mat(n, d, P):
-    A_mat = np.empty((d, n - 1))
-    for i in range(n - 1):
-        A_mat[:, i] = P[i + 1] - P[0]  # I update A and calculate a_i at the same time, for efficiency.
-    return A_mat
-
 
 def _calc_alpha(u, v, n):
     alpha = np.inf
@@ -82,9 +76,8 @@ def caratheodory(P: list, u):
     d = len(P[0])
     if n <= d + 1:
         return P, u
-    A_mat = _calc_a_mat(n, d, P)
     # Find v
-    almost_v = null_space(A_mat)[:, 0]  # Get the first vector from the null_space.
+    almost_v = null_space((P[1:] - P[0]).T)[:, 0]  # Get the first vector from the null_space.
     v = _calc_v(almost_v, n)
     alpha = _calc_alpha(u, v, n)
     w = _calc_w(alpha, n, u, v)
