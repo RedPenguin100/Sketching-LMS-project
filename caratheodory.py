@@ -144,16 +144,17 @@ def fast_caratheodory(P, u, k):
     C = []
     w = []
     # mu_i = 0
-    for mu_tilde_i, mu in enumerate(mu_tilde):
-        mu_i = np.where((mus == mu).all(axis=1))[0][0]
-        # mu_i = index_of_point(mus, mu, prev_index=mu_i)
-        weight_denominator = 0.
-        for index in partition_indices[mu_i]:
-            weight_denominator += u[index]
-        for index in partition_indices[mu_i]:
-            C.append(P[index])
-            w.append(w_tilde[mu_tilde_i] * u[index] / weight_denominator)
+    def func1():
+        for mu_tilde_i, mu in enumerate(mu_tilde):
+            mu_i = np.where((mus == mu).all(axis=1))[0][0]
+            weight_denominator = 0.
+            for index in partition_indices[mu_i]:
+                weight_denominator += u[index]
 
+            for index in partition_indices[mu_i]:
+                C.append(P[index])
+                w.append(w_tilde[mu_tilde_i] * u[index] / weight_denominator)
+    func1()
     if len(C) == len(P):
         raise RecursionError("Heading to infinite recursion")
     return fast_caratheodory(C, w, k)
