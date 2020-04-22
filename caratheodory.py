@@ -123,6 +123,13 @@ def fast_caratheodory(P, u, k):
     :note: we assume the points are unique
     """
     n = len(P)
+    def conversion_from_list_to_np_array(P, u):
+        if isinstance(u, list):
+            u = np.array(u)
+        if isinstance(P, list):
+            P = np.array(P)
+        return P, u
+    P, u = conversion_from_list_to_np_array(P, u)
     if n == 0:
         raise ValueError("Error: P cannot be empty")
     d = len(P[0])
