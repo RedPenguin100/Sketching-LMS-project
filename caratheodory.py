@@ -60,7 +60,7 @@ def _calc_v(almost_v, n):
     return v
 
 
-def caratheodory(P: list, u):
+def caratheodory(P: list, u, n, d):
     """
     Returns a smaller weighted set as described in caratheodory theorem.
     :param P: list of n points in R^d
@@ -69,21 +69,22 @@ def caratheodory(P: list, u):
     :return: A caratheodory set (S,w)
     :note: Running time: O(n^2d^2)
     """
-    n = len(P)
     if n == 0:
         raise ValueError("Error: P cannot be empty")
-    d = len(P[0])
     if n <= d + 1:
         return P, u
     # Find v
-    almost_v = null_space((P[1:] - P[0]).T)[:, 0]  # Get the first vector from the null_space.
+    almost_v = np.zeros(n - 1)
+    mat = (P[1:] - P[0])[:d + 1].T
+    almost_v[0:d+1] = null_space(mat)[:, 0]  # Get the first vector from the null_space.
     v = _calc_v(almost_v, n)
     alpha = _calc_alpha(u, v, n)
     w = _calc_w(alpha, n, u, v)
     S = _calc_S(n, w, P)
     _remove_w_zeros(w)
-    if len(S) > d + 1:
-        return caratheodory(S, w)
+    new_n = len(S)
+    if new_n > d + 1:
+        return caratheodory(S, w, new_n, d)
     return S, w
 
 
@@ -134,12 +135,12 @@ def fast_caratheodory(P, u, k):
     if k < 1:
         raise ValueError()
     if k == n:
-        return caratheodory(P, u)  # Exactly the same in that case.
+        return caratheodory(P, u, n, d)  # Exactly the same in that case.
     partition_indices = np.array_split(np.arange(n), k)
     p_partition = np.array_split(P, k)
     u_partition = np.array_split(u, k)
     mus, u_tag = get_mus_utag(p_partition, u_partition)
-    (mu_tilde, w_tilde) = caratheodory(mus, u_tag)
+    (mu_tilde, w_tilde) = caratheodory(mus, u_tag, len(mus), len(mus[0]))
 
     C = []
     w = []
