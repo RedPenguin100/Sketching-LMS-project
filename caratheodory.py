@@ -184,11 +184,19 @@ def caratheodory_matrix(A, k):
         print("d^2 + 1 is not smaller than n")
 
     # Note: PERFORMANCE
-    index_in_P = 0
     for i in range(minimum):
         p = C[i]
-        index_in_P = np.where((P == p).all(axis=1))[0]
 
-        S[i] = np.sqrt(n * w[i]) * A[index_in_P]
+        def line1():
+            index_in_P = np.where((P == p).all(axis=1))[0]
+            if len(index_in_P) > 1:
+                return index_in_P[0]
+            return index_in_P
 
+        index_in_P = line1()
+
+        def line2():
+            S[i] = np.sqrt(n * w[i]) * A[index_in_P]
+
+        line2()
     return S
