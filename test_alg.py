@@ -93,7 +93,7 @@ def test_lms_generated_data():
     A, b = get_dummy_data()
     print("Done generating")
     (n, d) = A.shape
-    C, y = lms_coreset(A, b, m=1, k=25)
+    C, y = lms_coreset(A, b, m=1, k=100)
     x = np.linalg.lstsq(A, b)[0]
     x_fast = np.linalg.lstsq(C, y)[0]
     assert approx(x_fast[0], abs=1e-4) == x[0]
