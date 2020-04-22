@@ -53,9 +53,13 @@ def _remove_w_zeros(w):
         w.remove(0.)
 
 
-def _calc_v(almost_v, n):
+def _get_v(S, n, d):
+    almost_v = np.zeros(n - 1)
+    mat = (S[1:d + 2] - S[0]).T
+    almost_v[0:d + 1] = null_space(mat)[:, 0]  # Get the first vector from the null_space.
+
     v = np.empty(n)
-    v[0] = -sum(almost_v)
+    v[0] = -np.sum(almost_v)
     v[1:] = almost_v
     return v
 
@@ -73,18 +77,17 @@ def caratheodory(P: list, u, n, d):
         raise ValueError("Error: P cannot be empty")
     if n <= d + 1:
         return P, u
-    # Find v
-    almost_v = np.zeros(n - 1)
-    mat = (P[1:] - P[0])[:d + 1].T
-    almost_v[0:d+1] = null_space(mat)[:, 0]  # Get the first vector from the null_space.
-    v = _calc_v(almost_v, n)
-    alpha = _calc_alpha(u, v, n)
-    w = _calc_w(alpha, n, u, v)
-    S = _calc_S(n, w, P)
-    _remove_w_zeros(w)
-    new_n = len(S)
-    if new_n > d + 1:
-        return caratheodory(S, w, new_n, d)
+
+    S = P
+    w = u
+    while n > d + 1:
+        # Find v
+        v = _get_v(S, n, d)
+        alpha = _calc_alpha(w, v, n)
+        w = _calc_w(alpha, n, w, v)
+        S = _calc_S(n, w, S)
+        _remove_w_zeros(w)
+        n = len(S)
     return S, w
 
 
