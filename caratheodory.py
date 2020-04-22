@@ -147,9 +147,7 @@ def fast_caratheodory(P, u, k):
     def func1():
         for mu_tilde_i, mu in enumerate(mu_tilde):
             mu_i = np.where((mus == mu).all(axis=1))[0][0]
-            weight_denominator = 0.
-            for index in partition_indices[mu_i]:
-                weight_denominator += u[index]
+            weight_denominator = np.sum(u[partition_indices[mu_i]])
 
             for index in partition_indices[mu_i]:
                 C.append(P[index])
