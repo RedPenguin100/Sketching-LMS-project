@@ -39,8 +39,6 @@ def _calc_w(alpha, n, u, v):
 
 def _calc_S(n, w, P, indexes):
     S = []
-    print("N values: ", n)
-    print("len indexes: ", len(indexes))
     indexes_to_remove = []
     for i in range(n):
         if w[i] > 0:
@@ -78,7 +76,7 @@ def caratheodory_alg(P: list, u, n, d, indexes=None):
     if n == 0:
         raise ValueError("Error: P cannot be empty")
     if n <= d + 1:
-        return P, u
+        return P, u, indexes
 
     S = P
     w = u
