@@ -25,6 +25,4 @@ def lms_coreset(A, b, m, k):
         raise ValueError("In lms_coreset: rows are larger than expected")
     if S_m > d + 1:
         raise ValueError("In lms_coreset: columns are larger than expected.")
-    C = S[:, 0:S_m - 1]
-    y = S[:, S_m - 1]
-    return C, y
+    return S[:, 0:S_m - 1], S[:, S_m - 1]

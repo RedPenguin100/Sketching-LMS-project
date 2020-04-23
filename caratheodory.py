@@ -122,14 +122,11 @@ def fast_caratheodory(P, u, k, indexes=None):
     if indexes is None:
         indexes = np.arange(n)
 
-    def conversion_from_list_to_np_array(P, u):
-        if isinstance(u, list):
-            u = np.array(u)
-        if isinstance(P, list):
-            P = np.array(P)
-        return P, u
+    if isinstance(u, list):
+        u = np.array(u)
+    if isinstance(P, list):
+        P = np.array(P)
 
-    P, u = conversion_from_list_to_np_array(P, u)
     if n == 0:
         raise ValueError("Error: P cannot be empty")
     d = len(P[0])
@@ -186,6 +183,7 @@ def caratheodory_matrix(A, k):
         raise ValueError("k should be larger or equal to d + 2")
     P = np.matmul(A.reshape(n, d, 1), A.reshape(n, 1, d)).reshape((n, np.power(d, 2)))
     u = np.ones(n) * (1 / n)
+
     (C, w, indexes) = fast_caratheodory(P, u, k)
     S = np.empty((np.power(d, 2) + 1, d))
     minimum = np.min([np.power(d, 2) + 1, n])
