@@ -18,7 +18,7 @@ def test_caratheodory():
     assert approx(sum(u)) == 1, "u values need to sum up to 1"
     expected_weighted_mean = _calculate_weighted_mean(P, u)
 
-    S, w = caratheodory_alg(P, u, len(P), len(P[0]))
+    S, w, _ = caratheodory_alg(P, u, len(P), len(P[0]))
 
     actual_weighted_mean = 0
     for i in range(len(S)):
@@ -39,7 +39,7 @@ def test_fast_caratheodory():
     assert approx(sum(u)) == 1, "u values need to sum up to 1"
     expected_weighted_mean = _calculate_weighted_mean(P, u)
 
-    S, w = fast_caratheodory(P, u, 4)
+    S, w, _ = fast_caratheodory(P, u, 4)
 
     assert len(S) <= d + 1
     assert 1 == approx(sum(w))

@@ -90,7 +90,7 @@ def caratheodory_alg(P: list, u, n, d, indexes=None):
         S = _calc_S(n, w_next, S, indexes)
         w = _remove_w_zeros(w_next)
         n = len(S)
-    return S, w
+    return S, w, indexes
 
 
 def get_mus_utag(P_partitions, u_partitions):
@@ -136,7 +136,7 @@ def fast_caratheodory(P, u, k, indexes=None):
         raise ValueError("Error: P cannot be empty")
     d = len(P[0])
     if n <= d + 1:
-        return P, u
+        return P, u, indexes
     if k > n:  # TODO: decide on the best way to fix this.
         k = n
     if k < 1:
@@ -148,7 +148,7 @@ def fast_caratheodory(P, u, k, indexes=None):
     u_partition = np.array_split(u, k)
     mus, u_tag = get_mus_utag(p_partition, u_partition)
     mu_indexes = list(range(len(mus)))
-    (mu_tilde, w_tilde) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]), indexes=mu_indexes)
+    (mu_tilde, w_tilde, mu_indexes) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]), indexes=mu_indexes)
 
     C = []
     w = []
@@ -182,7 +182,7 @@ def caratheodory_matrix(A, k):
         raise ValueError("k should be larger or equal to d + 2")
     P = np.matmul(A.reshape(n, d, 1), A.reshape(n, 1, d)).reshape((n, np.power(d, 2)))
     u = np.ones(n) * (1 / n)
-    (C, w) = fast_caratheodory(P, u, k)
+    (C, w, _) = fast_caratheodory(P, u, k)
     S = np.empty((np.power(d, 2) + 1, d))
     minimum = np.min([np.power(d, 2) + 1, n])
     if minimum == n:
