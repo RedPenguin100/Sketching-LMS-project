@@ -45,10 +45,10 @@ def _calc_S(n, w, P, indexes):
             S.append(P[i])
         else:
             indexes_to_remove.append(i)
-    if indexes_to_remove and indexes:
+    if indexes_to_remove and (indexes.size != 0):
         for index in indexes_to_remove[::-1]:
-            indexes.pop(index)
-    return S
+            indexes = np.concatenate((indexes[0:index], indexes[index + 1:]))
+    return S, indexes
 
 
 def _remove_w_zeros(w):
@@ -72,7 +72,7 @@ def caratheodory_alg(P: list, u, n, d, indexes=None):
     :note: Running time: O(n^2d^2)
     """
     if indexes is None:
-        indexes = []
+        indexes = np.array([])
     if n == 0:
         raise ValueError("Error: P cannot be empty")
     if n <= d + 1:
@@ -85,7 +85,7 @@ def caratheodory_alg(P: list, u, n, d, indexes=None):
         v = _get_v(S, n, d)
         alpha = _calc_alpha(w, v, n)
         w_next = _calc_w(alpha, n, w, v)
-        S = _calc_S(n, w_next, S, indexes)
+        S, indexes = _calc_S(n, w_next, S, indexes)
         w = _remove_w_zeros(w_next)
         n = len(S)
     return S, w, indexes
@@ -146,7 +146,7 @@ def fast_caratheodory(P, u, k, indexes=None):
     p_partition = np.array_split(P, k)
     u_partition = np.array_split(u, k)
     mus, u_tag = get_mus_utag(p_partition, u_partition)
-    mu_indexes = list(range(len(mus)))
+    mu_indexes = np.arange(len(mus))
     (mu_tilde, w_tilde, mu_indexes) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]), indexes=mu_indexes)
 
     indexes2 = []
@@ -168,7 +168,7 @@ def fast_caratheodory(P, u, k, indexes=None):
     C, w = get_c_w()
     if len(C) == len(P):
         raise RecursionError("Heading to infinite recursion")
-    return fast_caratheodory(C, w, k, indexes=indexes2)
+    return fast_caratheodory(C, w, k, indexes=np.array(indexes2))
 
 
 def caratheodory_matrix(A, k):
