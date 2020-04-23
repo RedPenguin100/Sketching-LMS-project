@@ -33,24 +33,28 @@ def _calc_alpha(u, v, n):
 
 
 def _calc_w(alpha, n, u, v):
-    w = []
-    for i in range(n):
-        w.append(u[i] - alpha * v[i])
+    w = u[0:n] - alpha * v
     return w
 
 
-def _calc_S(n, w, P):
+def _calc_S(n, w, P, indexes):
     S = []
+    print("N values: ", n)
+    print("len indexes: ", len(indexes))
+    indexes_to_remove = []
     for i in range(n):
         if w[i] > 0:
             S.append(P[i])
+        else:
+            indexes_to_remove.append(i)
+    if indexes_to_remove and indexes:
+        for index in indexes_to_remove[::-1]:
+            indexes.pop(index)
     return S
 
 
 def _remove_w_zeros(w):
-    w_zeros = w.count(0.)
-    for j in range(w_zeros):
-        w.remove(0.)
+    return w[w != 0.]
 
 
 def _get_v(S, n, d):
