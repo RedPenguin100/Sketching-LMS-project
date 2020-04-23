@@ -1,7 +1,7 @@
 import pytest
 from pytest import approx
 
-from caratheodory import caratheodory, _calculate_weighted_mean, fast_caratheodory, caratheodory_matrix
+from caratheodory import caratheodory_alg, _calculate_weighted_mean, fast_caratheodory, caratheodory_matrix
 import numpy as np
 
 from data_generator import get_dummy_data
@@ -18,7 +18,7 @@ def test_caratheodory():
     assert approx(sum(u)) == 1, "u values need to sum up to 1"
     expected_weighted_mean = _calculate_weighted_mean(P, u)
 
-    S, w = caratheodory(P, u, len(P), len(P[0]))
+    S, w = caratheodory_alg(P, u, len(P), len(P[0]))
 
     actual_weighted_mean = 0
     for i in range(len(S)):

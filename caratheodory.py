@@ -140,12 +140,12 @@ def fast_caratheodory(P, u, k):
     if k < 1:
         raise ValueError()
     if k == n:
-        return caratheodory(P, u, n, d)  # Exactly the same in that case.
+        return caratheodory_alg(P, u, n, d)  # Exactly the same in that case.
     partition_indices = np.array_split(np.arange(n), k)
     p_partition = np.array_split(P, k)
     u_partition = np.array_split(u, k)
     mus, u_tag = get_mus_utag(p_partition, u_partition)
-    (mu_tilde, w_tilde) = caratheodory(mus, u_tag, len(mus), len(mus[0]))
+    (mu_tilde, w_tilde) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]))
 
     C = []
     w = []
