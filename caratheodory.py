@@ -94,15 +94,17 @@ def caratheodory_alg(P: list, u, n, d, indexes=None):
 def get_mus_utag(P_partitions, u_partitions):
     mus = []
     u_partitions = np.array(u_partitions)
-    if len(u_partitions.shape) == 2:
+    u_shape = u_partitions.shape
+    if len(u_shape) == 2:
         u_tag = np.apply_along_axis(np.sum, -1, np.array(u_partitions))
-    elif len(u_partitions.shape) == 1:
+    elif len(u_shape) == 1:
         v = np.vectorize(np.sum)
         u_tag = v(u_partitions)
     else:
         raise ValueError("Shape cannot be != 2/1")
-    for i, (p_partition, u_partition) in enumerate(zip(P_partitions, u_partitions)):
-        new_point = np.matmul(p_partition.T, u_partition)
+    # performance: np.matmul
+    for i in np.arange(u_shape[0]):
+        new_point = np.matmul(P_partitions[i].T, u_partitions[i])
         mus.append(new_point / u_tag[i])
     return mus, u_tag
 
