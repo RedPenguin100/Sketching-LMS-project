@@ -120,9 +120,9 @@ def fast_caratheodory(P, u, k, indexes=None):
     :return: A caratheodory set (S,w)
     :note: we assume the points are unique
     """
-    if indexes is None:
-        indexes = []
     n = len(P)
+    if indexes is None:
+        indexes = np.arange(n)
 
     def conversion_from_list_to_np_array(P, u):
         if isinstance(u, list):
@@ -142,27 +142,35 @@ def fast_caratheodory(P, u, k, indexes=None):
     if k < 1:
         raise ValueError()
     if k == n:
-        return caratheodory_alg(P, u, n, d)  # Exactly the same in that case.
+        return caratheodory_alg(P, u, n, d, indexes)  # Exactly the same in that case.
     partition_indices = np.array_split(np.arange(n), k)
+    parted_saved_indexes = np.array_split(indexes, k)
     p_partition = np.array_split(P, k)
     u_partition = np.array_split(u, k)
     mus, u_tag = get_mus_utag(p_partition, u_partition)
     mu_indexes = list(range(len(mus)))
     (mu_tilde, w_tilde, mu_indexes) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]), indexes=mu_indexes)
 
-    C = []
-    w = []
-    for mu_tilde_i, mu in enumerate(mu_tilde):
-        mu_i = indexes[mu_tilde_i]
-        current_partition = partition_indices[mu_i]
-        current_weights = u[current_partition]
-        weight_denominator = np.sum(current_weights)
-        w.append(np.multiply(w_tilde[mu_tilde_i], current_weights) / weight_denominator)
-        C.append(P[current_partition])
-    C, w = np.concatenate(C), np.concatenate(w)
+    indexes2 = []
+    def get_c_w():
+        C = []
+        w = []
+        for mu_tilde_i, mu in enumerate(mu_tilde):
+            mu_i = mu_indexes[mu_tilde_i]
+            current_partition = partition_indices[mu_i]
+            current_weights = u[current_partition]
+            weight_denominator = np.sum(current_weights)
+            w.append(np.multiply(w_tilde[mu_tilde_i], current_weights) / weight_denominator)
+            C.append(P[current_partition])
+            for index in parted_saved_indexes[mu_i]:
+                indexes2.append(index)
+        C, w = np.concatenate(C), np.concatenate(w)
+        return C, w
+
+    C, w = get_c_w()
     if len(C) == len(P):
         raise RecursionError("Heading to infinite recursion")
-    return fast_caratheodory(C, w, k)
+    return fast_caratheodory(C, w, k, indexes=indexes2)
 
 
 def caratheodory_matrix(A, k):
@@ -182,24 +190,12 @@ def caratheodory_matrix(A, k):
         raise ValueError("k should be larger or equal to d + 2")
     P = np.matmul(A.reshape(n, d, 1), A.reshape(n, 1, d)).reshape((n, np.power(d, 2)))
     u = np.ones(n) * (1 / n)
-    (C, w, _) = fast_caratheodory(P, u, k)
+    (C, w, indexes) = fast_caratheodory(P, u, k)
     S = np.empty((np.power(d, 2) + 1, d))
     minimum = np.min([np.power(d, 2) + 1, n])
     if minimum == n:
         print("d^2 + 1 is not smaller than n")
 
-    # Note: PERFORMANCE
     for i in range(minimum):
-        p = C[i]
-
-        def line1():
-            index_in_P = np.where((P == p).all(axis=1))[0]
-            return index_in_P[0]
-
-        index_in_P = line1()
-
-        def line2():
-            S[i] = np.sqrt(n * w[i]) * A[index_in_P]
-
-        line2()
+        S[i] = np.sqrt(n * w[i]) * A[indexes[i]]
     return S
