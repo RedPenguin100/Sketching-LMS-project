@@ -180,7 +180,7 @@ def caratheodory_matrix(A, k):
     if k < d + 2:
         raise ValueError("k should be larger or equal to d + 2")
     P = np.matmul(A.reshape(n, d, 1), A.reshape(n, 1, d)).reshape((n, np.power(d, 2)))
-    u = np.ones(n) * (1 / n)
+    u = np.full(n, 1 / n)
 
     (C, w, indexes) = fast_caratheodory(P, u, k)
     S = np.empty((np.power(d, 2) + 1, d))
