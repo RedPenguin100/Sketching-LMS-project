@@ -48,11 +48,8 @@ def caratheodory_alg(P, u, n, d, indexes=None):
         almost_v[0:d + 1] = null_space(mat)[:, 0]  # Get the first vector from the null_space.
         v = np.insert(np.array([-np.sum(almost_v)]), 1, almost_v)
 
-        alpha = np.inf
-        for i in range(n):
-            if v[i] <= 0:
-                continue
-            alpha = min(alpha, w[i] / v[i])
+        v_cond = v > 0.
+        alpha = np.min(w[v_cond] / v[v_cond])
         w = w[0:n] - alpha * v
 
         cond = w > 0
