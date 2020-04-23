@@ -64,7 +64,7 @@ def _get_v(S, n, d):
     return np.insert(almost_v, 0, np.array([-np.sum(almost_v)]))
 
 
-def caratheodory(P: list, u, n, d):
+def caratheodory_alg(P: list, u, n, d, indexes=None):
     """
     Returns a smaller weighted set as described in caratheodory theorem.
     :param P: list of n points in R^d
@@ -73,6 +73,8 @@ def caratheodory(P: list, u, n, d):
     :return: A caratheodory set (S,w)
     :note: Running time: O(n^2d^2)
     """
+    if indexes is None:
+        indexes = []
     if n == 0:
         raise ValueError("Error: P cannot be empty")
     if n <= d + 1:
@@ -84,9 +86,9 @@ def caratheodory(P: list, u, n, d):
         # Find v
         v = _get_v(S, n, d)
         alpha = _calc_alpha(w, v, n)
-        w = _calc_w(alpha, n, w, v)
-        S = _calc_S(n, w, S)
-        _remove_w_zeros(w)
+        w_next = _calc_w(alpha, n, w, v)
+        S = _calc_S(n, w_next, S, indexes)
+        w = _remove_w_zeros(w_next)
         n = len(S)
     return S, w
 
