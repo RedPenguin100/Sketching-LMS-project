@@ -23,30 +23,7 @@ def _calculate_weighted_mean(P: list, u):
     return weight
 
 
-def _calc_alpha(u, v, n):
-    alpha = np.inf
-    for i in range(n):
-        if v[i] <= 0:
-            continue
-        alpha = min(alpha, u[i] / v[i])
-    return alpha
-
-
-def _calc_S(n, w, P, indexes):
-    S = []
-    indexes_to_remove = []
-    for i in range(n):
-        if w[i] > 0:
-            S.append(P[i])
-        else:
-            indexes_to_remove.append(i)
-    if indexes_to_remove and (indexes.size != 0):
-        for index in indexes_to_remove[::-1]:
-            indexes = np.concatenate((indexes[0:index], indexes[index + 1:]))
-    return S, indexes
-
-
-def caratheodory_alg(P: list, u, n, d, indexes=None):
+def caratheodory_alg(P, u, n, d, indexes=None):
     """
     Returns a smaller weighted set as described in caratheodory theorem.
     :param P: list of n points in R^d
@@ -56,13 +33,13 @@ def caratheodory_alg(P: list, u, n, d, indexes=None):
     :note: Running time: O(n^2d^2)
     """
     if indexes is None:
-        indexes = np.array([])
+        indexes = np.arange(n)
     if n == 0:
         raise ValueError("Error: P cannot be empty")
     if n <= d + 1:
         return P, u, indexes
 
-    S = P
+    S = np.array(P)
     w = u
     while n > d + 1:
         # Find v
@@ -77,8 +54,10 @@ def caratheodory_alg(P: list, u, n, d, indexes=None):
                 continue
             alpha = min(alpha, w[i] / v[i])
         w = w[0:n] - alpha * v
-        S, indexes = _calc_S(n, w, S, indexes)
-        w = w[w != 0.]
+
+        cond = w > 0
+        S, indexes = S[cond], indexes[cond]
+        w = w[cond]
         n = len(S)
     return S, w, indexes
 
