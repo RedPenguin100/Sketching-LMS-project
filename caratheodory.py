@@ -149,7 +149,6 @@ def fast_caratheodory(P, u, k, indexes=None):
     mu_indexes = np.arange(len(mus))
     (mu_tilde, w_tilde, mu_indexes) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]), indexes=mu_indexes)
 
-    indexes2 = []
     def get_c_w():
         C = []
         w = []
@@ -160,15 +159,14 @@ def fast_caratheodory(P, u, k, indexes=None):
             weight_denominator = np.sum(current_weights)
             w.append(np.multiply(w_tilde[mu_tilde_i], current_weights) / weight_denominator)
             C.append(P[current_partition])
-            for index in parted_saved_indexes[mu_i]:
-                indexes2.append(index)
+        saved_indexes = np.concatenate(np.array(parted_saved_indexes)[mu_indexes])
         C, w = np.concatenate(C), np.concatenate(w)
-        return C, w
+        return C, w, saved_indexes
 
-    C, w = get_c_w()
+    C, w, saved_indexes = get_c_w()
     if len(C) == len(P):
         raise RecursionError("Heading to infinite recursion")
-    return fast_caratheodory(C, w, k, indexes=np.array(indexes2))
+    return fast_caratheodory(C, w, k, indexes=np.array(saved_indexes))
 
 
 def caratheodory_matrix(A, k):
