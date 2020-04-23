@@ -40,7 +40,7 @@ def caratheodory_alg(P, u, n, d, indexes=None):
         return P, u, indexes
 
     S = np.array(P)
-    w = u
+    w = np.array(u)
     while n > d + 1:
         # Find v
         almost_v = np.zeros(n - 1)
