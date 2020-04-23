@@ -2,20 +2,6 @@ import numpy as np
 from scipy.linalg import null_space
 
 
-def _fast_all(p1, p2):
-    for i in range(len(p1)):
-        if p1[i] != p2[i]:
-            return False
-    return True
-
-
-def index_of_point(l, point, prev_index=0):
-    for i in range(prev_index, len(l)):
-        if _fast_all(l[i], point):
-            return i
-    raise ValueError("Cannot find {} inside {}".format(point, l))
-
-
 def _calculate_weighted_mean(P: list, u):
     weight = 0.
     for i in range(len(P)):
