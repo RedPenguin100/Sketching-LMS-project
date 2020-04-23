@@ -41,11 +41,10 @@ def caratheodory_alg(P, u, n, d, indexes=None):
         alpha = np.min(w[v_cond] / v[v_cond])
         w = w - alpha * v
 
-        cond = w > 10e-18 # we don't write 0 to avoid numerical instability
+        cond = w > 10e-18  # we don't write 0 to avoid numerical instability
         S, indexes, w = S[cond], indexes[cond], w[cond]
         n = len(S)
-    return S,w,indexes
-
+    return S, w, indexes
 
 
 def get_mus_utag(P_partitions, u_partitions):
