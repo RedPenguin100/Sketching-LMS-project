@@ -68,7 +68,7 @@ def test_lms_coreset():
                   [0, 2], [0, 3], [0, 4], [0, 5]
                   ])
     b = np.array([-1, -1, 1, 1, 0, 2, 4, 5, 1, 2, 3, 4])
-    C, y = lms_coreset(A, b, m=2, k=5)
+    C, y = lms_coreset(np.concatenate((A,b.reshape(len(b), 1)),axis=1), m=2, k=5)
 
 
 def test_lms_coreset_bad_k_value():
@@ -78,7 +78,7 @@ def test_lms_coreset_bad_k_value():
                   ])
     b = np.array([-1, -1, 1, 1, 0, 2, 4, 5, 1, 2, 3, 4])
     with pytest.raises(ValueError):
-        C, y = lms_coreset(A, b, m=2, k=2)
+        C, y = lms_coreset(np.concatenate((A,b)), m=2, k=2)
 
 
 import sys
@@ -90,10 +90,12 @@ def test_lms_generated_data():
     """
     Sometimes fails due to numerical instability.
     """
-    A, b = get_dummy_data()
+    A_tag = get_dummy_data()
     print("Done generating")
-    (n, d) = A.shape
-    C, y = lms_coreset(A, b, m=1, k=100)
-    x = np.linalg.lstsq(A, b)[0]
+    (n, d) = A_tag.shape
+    C, y = lms_coreset(A_tag, m=1, k=100)
+    A = A_tag[:, 0:2]
+    b = A_tag[:, 2:3]
+    x = np.linalg.lstsq(A,  b)[0]
     x_fast = np.linalg.lstsq(C, y)[0]
     assert approx(x_fast[0], abs=1e-4) == x[0]

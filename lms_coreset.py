@@ -3,19 +3,20 @@ import numpy as np
 from caratheodory import caratheodory_matrix
 
 
-def lms_coreset(A, b, m, k):
+def lms_coreset(A_tag, m, k):
     """
     TODO: write documentation
-    :param A:
+    :param A_tag:
     :param b:
     :param m:
     :param k:
     :return:
     """
-    (n, d) = A.shape
-    A_tag = np.concatenate((A, b.reshape(n, 1)), axis=1)
+    (n, d_tag) = A_tag.shape
+    d = d_tag - 1 # A_tag is n x (d + 1)
     A_block_list = np.array_split(A_tag, m)  # Each block with size at most n // m + 1
     S_list = []
+
     for block in A_block_list:
         S_list.append(caratheodory_matrix(block, k))
 
