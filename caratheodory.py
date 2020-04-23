@@ -96,7 +96,7 @@ def get_mus_utag(P_partitions, u_partitions):
     u_partitions = np.array(u_partitions)
     u_shape = u_partitions.shape
     if len(u_shape) == 2:
-        u_tag = np.apply_along_axis(np.sum, -1, np.array(u_partitions))
+        u_tag = np.apply_along_axis(np.sum, -1, u_partitions)
     elif len(u_shape) == 1:
         v = np.vectorize(np.sum)
         u_tag = v(u_partitions)
