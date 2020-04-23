@@ -32,11 +32,6 @@ def _calc_alpha(u, v, n):
     return alpha
 
 
-def _calc_w(alpha, n, u, v):
-    w = u[0:n] - alpha * v
-    return w
-
-
 def _calc_S(n, w, P, indexes):
     S = []
     indexes_to_remove = []
@@ -49,10 +44,6 @@ def _calc_S(n, w, P, indexes):
         for index in indexes_to_remove[::-1]:
             indexes = np.concatenate((indexes[0:index], indexes[index + 1:]))
     return S, indexes
-
-
-def _remove_w_zeros(w):
-    return w[w != 0.]
 
 
 def _get_v(S, n, d):
@@ -82,11 +73,19 @@ def caratheodory_alg(P: list, u, n, d, indexes=None):
     w = u
     while n > d + 1:
         # Find v
-        v = _get_v(S, n, d)
-        alpha = _calc_alpha(w, v, n)
-        w_next = _calc_w(alpha, n, w, v)
-        S, indexes = _calc_S(n, w_next, S, indexes)
-        w = _remove_w_zeros(w_next)
+        almost_v = np.zeros(n - 1)
+        mat = (S[1:d + 2] - S[0]).T
+        almost_v[0:d + 1] = null_space(mat)[:, 0]  # Get the first vector from the null_space.
+        v = np.insert(np.array([-np.sum(almost_v)]), 1, almost_v)
+
+        alpha = np.inf
+        for i in range(n):
+            if v[i] <= 0:
+                continue
+            alpha = min(alpha, w[i] / v[i])
+        w = w[0:n] - alpha * v
+        S, indexes = _calc_S(n, w, S, indexes)
+        w = w[w != 0.]
         n = len(S)
     return S, w, indexes
 
