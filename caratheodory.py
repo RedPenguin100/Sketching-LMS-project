@@ -145,15 +145,18 @@ def fast_caratheodory(P, u, k):
     p_partition = np.array_split(P, k)
     u_partition = np.array_split(u, k)
     mus, u_tag = get_mus_utag(p_partition, u_partition)
-    (mu_tilde, w_tilde) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]))
+    indexes = list(range(len(mus)))
+    (mu_tilde, w_tilde) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]), indexes=indexes)
 
     C = []
     w = []
     for mu_tilde_i, mu in enumerate(mu_tilde):
-        mu_i = np.where((mus == mu).all(axis=1))[0][0]
-        weight_denominator = np.sum(u[partition_indices[mu_i]])
-        w.append(np.multiply(w_tilde[mu_tilde_i], u[partition_indices[mu_i]]) / weight_denominator)
-        C.append(P[partition_indices[mu_i]])
+        mu_i = indexes[mu_tilde_i]
+        current_partition = partition_indices[mu_i]
+        current_weights = u[current_partition]
+        weight_denominator = np.sum(current_weights)
+        w.append(np.multiply(w_tilde[mu_tilde_i], current_weights) / weight_denominator)
+        C.append(P[current_partition])
     C, w = np.concatenate(C), np.concatenate(w)
     if len(C) == len(P):
         raise RecursionError("Heading to infinite recursion")
