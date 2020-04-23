@@ -38,9 +38,12 @@ def caratheodory_alg(P, u, n, d, indexes=None):
         raise ValueError("Error: P cannot be empty")
     if n <= d + 1:
         return P, u, indexes
-
-    S = np.array(P)
-    w = np.array(u)
+    if isinstance(u, list):
+        u = np.array(u)
+    if isinstance(P, list):
+        P = np.array(P)
+    S = P
+    w = u
     while n > d + 1:
         # Find v
         almost_v = np.zeros(n - 1)
@@ -49,15 +52,14 @@ def caratheodory_alg(P, u, n, d, indexes=None):
         v = np.insert(np.array([-np.sum(almost_v)]), 1, almost_v)
 
         v_cond = v > 0.
-        argmin_alpha = np.argmin(w[v_cond] / v[v_cond])
-        alpha = w[v_cond][argmin_alpha] / v[v_cond][argmin_alpha]
+        alpha = np.min(w[v_cond] / v[v_cond])
         w = w - alpha * v
 
-        cond = ~np.isclose(w, 0)
-        S, indexes = S[cond], indexes[cond]
-        w = w[cond]
+        cond = w > 10e-18 # we don't write 0 to avoid numerical instability
+        S, indexes, w = S[cond], indexes[cond], w[cond]
         n = len(S)
-    return S, w, indexes
+    return S,w,indexes
+
 
 
 def get_mus_utag(P_partitions, u_partitions):
@@ -114,8 +116,9 @@ def fast_caratheodory(P, u, k, indexes=None):
     p_partition = np.array_split(P, k)
     u_partition = np.array_split(u, k)
     mus, u_tag = get_mus_utag(p_partition, u_partition)
-    mu_indexes = np.arange(len(mus))
-    (mu_tilde, w_tilde, mu_indexes) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]), indexes=mu_indexes)
+    mus_length = len(mus)
+    mu_indexes = np.arange(mus_length)
+    (mu_tilde, w_tilde, mu_indexes) = caratheodory_alg(mus, u_tag, mus_length, len(mus[0]), indexes=mu_indexes)
 
     def get_c_w():
         w = []
@@ -130,7 +133,7 @@ def fast_caratheodory(P, u, k, indexes=None):
     C, w, saved_indexes = get_c_w()
     if len(C) == len(P):
         raise RecursionError("Heading to infinite recursion")
-    return fast_caratheodory(C, w, k, indexes=np.array(saved_indexes))
+    return fast_caratheodory(C, w, k, indexes=saved_indexes)
 
 
 def caratheodory_matrix(A, k):
