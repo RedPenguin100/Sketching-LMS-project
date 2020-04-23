@@ -102,7 +102,7 @@ def get_mus_utag(P_partitions, u_partitions):
     else:
         raise ValueError("Shape cannot be != 2/1")
     for i, (p_partition, u_partition) in enumerate(zip(P_partitions, u_partitions)):
-        new_point = np.sum(np.multiply(p_partition, u_partition.reshape(len(u_partition), 1)).T, axis=1)
+        new_point = np.matmul(p_partition.T, u_partition)
         mus.append(new_point / u_tag[i])
     return mus, u_tag
 
