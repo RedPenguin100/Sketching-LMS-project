@@ -152,7 +152,7 @@ def fast_caratheodory(P, u, k, indexes=None):
         for mu_tilde_i in range(len(mu_tilde)):
             mu_i = mu_indexes[mu_tilde_i]
             w.append((w_tilde[mu_tilde_i] * u_partition[mu_i]) / u_tag[mu_i])
-        C = [p_partition[index] for index in range(len(mu_indexes))]
+        C = [p_partition[index] for index in mu_indexes]
         saved_indexes = np.concatenate(np.array(parted_saved_indexes)[mu_indexes])
         C, w = np.concatenate(C), np.concatenate(w)
         return C, w, saved_indexes
