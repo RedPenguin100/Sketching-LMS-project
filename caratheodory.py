@@ -109,7 +109,7 @@ def get_mus_utag(P_partitions, u_partitions):
     return mus, u_tag
 
 
-def fast_caratheodory(P, u, k):
+def fast_caratheodory(P, u, k, indexes=None):
     """
     Returns a smaller weighted set as described in caratheodory theorem,
     using a fast algorithm O(nd).
@@ -120,6 +120,8 @@ def fast_caratheodory(P, u, k):
     :return: A caratheodory set (S,w)
     :note: we assume the points are unique
     """
+    if indexes is None:
+        indexes = []
     n = len(P)
 
     def conversion_from_list_to_np_array(P, u):
@@ -145,8 +147,8 @@ def fast_caratheodory(P, u, k):
     p_partition = np.array_split(P, k)
     u_partition = np.array_split(u, k)
     mus, u_tag = get_mus_utag(p_partition, u_partition)
-    indexes = list(range(len(mus)))
-    (mu_tilde, w_tilde) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]), indexes=indexes)
+    mu_indexes = list(range(len(mus)))
+    (mu_tilde, w_tilde) = caratheodory_alg(mus, u_tag, len(mus), len(mus[0]), indexes=mu_indexes)
 
     C = []
     w = []
