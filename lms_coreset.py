@@ -19,7 +19,6 @@ def lms_coreset(A_tag, m, k):
 
     for block in A_block_list:
         S_list.append(caratheodory_matrix(block, k))
-
     S = np.concatenate(S_list)
     (S_n, S_m) = S.shape
     if S_n > m + m * np.power(d + 1, 2):
