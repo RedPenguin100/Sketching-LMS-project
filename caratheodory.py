@@ -49,10 +49,11 @@ def caratheodory_alg(P, u, n, d, indexes=None):
         v = np.insert(np.array([-np.sum(almost_v)]), 1, almost_v)
 
         v_cond = v > 0.
-        alpha = np.min(w[v_cond] / v[v_cond])
-        w = w[0:n] - alpha * v
+        argmin_alpha = np.argmin(w[v_cond] / v[v_cond])
+        alpha = w[v_cond][argmin_alpha] / v[v_cond][argmin_alpha]
+        w = w - alpha * v
 
-        cond = w > 0
+        cond = ~np.isclose(w, 0)
         S, indexes = S[cond], indexes[cond]
         w = w[cond]
         n = len(S)
