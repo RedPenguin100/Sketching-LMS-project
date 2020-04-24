@@ -86,13 +86,9 @@ def test_lms_coreset_bad_k_value():
         C, y = lms_coreset(np.concatenate((A, b)), m=2, k=2)
 
 
-def test_lms_generated_data():
-    """
-    Sometimes fails due to numerical instability.
-    """
+def test_linred_boost_correctness():
     d = 2
     A_tag = get_dummy_data()
-    print("Done generating")
     x_fast = linreg_boost(A_tag, m=1, k=100)[0]
     A, b = A_tag[:, 0:d], A_tag[:, d]
     x = np.linalg.lstsq(A, b)[0]
