@@ -92,7 +92,8 @@ def test_lms_generated_data():
     d = 2
     A_tag = get_dummy_data()
     print("Done generating")
-    x_fast = linreg_boost(A_tag, m=1, k=100)
+    x_fast_res = linreg_boost(A_tag, m=1, k=100)
+    x_fast = x_fast_res[0]
     A = A_tag[:, 0:d]
     b = A_tag[:, d:]
     x = np.linalg.lstsq(A, b)[0]
