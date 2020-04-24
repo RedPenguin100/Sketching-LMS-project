@@ -1,8 +1,7 @@
 import numpy as np
 
 
-def get_dummy_data():
-    n = 1000000
+def get_dummy_data(n=10000000):
     A = np.empty((n, 3))
     A[:, 2] = np.arange(n)
     rand = np.random.uniform(size=2 * n)
