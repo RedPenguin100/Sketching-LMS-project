@@ -3,10 +3,11 @@ import sys
 import numpy as np
 
 from pytest import approx
+from sklearn.linear_model import RidgeCV, LassoCV
 
 from caratheodory import caratheodory_alg, _calculate_weighted_mean, fast_caratheodory, caratheodory_matrix
 from data_generator import get_dummy_data
-from lms_boost import linreg_boost
+from lms_boost import linreg_boost, ridgecv_boost, lassocv_boost
 from lms_coreset import lms_coreset
 
 sys.setrecursionlimit(1000000)
@@ -93,6 +94,29 @@ def test_lms_generated_data():
     A_tag = get_dummy_data()
     print("Done generating")
     x_fast = linreg_boost(A_tag, m=1, k=100)[0]
-    A, b = A_tag[:, 0:d], A_tag[:, d:]
+    A, b = A_tag[:, 0:d], A_tag[:, d]
     x = np.linalg.lstsq(A, b)[0]
     assert approx(x_fast[0], abs=1e-4) == x[0]
+
+
+def test_ridgecv_boost_correctness():
+    d = 2
+    A_tag = get_dummy_data(n=100000)
+    alphas = (0.1, 1 , 10 , 100, 1000)
+    m = 10
+    res = ridgecv_boost(A_tag, alphas, m=m, k=100)
+    A, b = A_tag[:, 0:d], A_tag[:, d]
+    res2 = RidgeCV(alphas=alphas, cv=m).fit(A, b)
+    # TODO: give better data for improved numerical stability for this problem
+    assert approx(res.coef_, abs=0.1) == res2.coef_
+
+
+def test_lassocv_boost_correctness():
+    d = 2
+    A_tag = get_dummy_data(n=100000)
+    alphas = (0.1, 1, 10, 100, 1000)
+    m = 10
+    res = lassocv_boost(A_tag, alphas, m=m, k=100)
+    A, b = A_tag[:, 0:d], A_tag[:, d]
+    res2 = LassoCV(alphas=alphas, cv=m).fit(A,b)
+    assert approx(res.coef_, abs=1e-4) == res2.coef_
