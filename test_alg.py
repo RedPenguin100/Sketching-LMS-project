@@ -3,11 +3,11 @@ import sys
 import numpy as np
 
 from pytest import approx
-from sklearn.linear_model import RidgeCV, LassoCV
+from sklearn.linear_model import RidgeCV, LassoCV, ElasticNetCV
 
 from caratheodory import caratheodory_alg, _calculate_weighted_mean, fast_caratheodory, caratheodory_matrix
 from data_generator import get_dummy_data
-from lms_boost import linreg_boost, ridgecv_boost, lassocv_boost
+from lms_boost import linreg_boost, ridgecv_boost, lassocv_boost, elasticcv_boost
 from lms_coreset import lms_coreset
 
 sys.setrecursionlimit(1000000)
@@ -102,7 +102,7 @@ def test_lms_generated_data():
 def test_ridgecv_boost_correctness():
     d = 2
     A_tag = get_dummy_data(n=100000)
-    alphas = (0.1, 1 , 10 , 100, 1000)
+    alphas = (0.1, 1, 10, 100, 1000)
     m = 10
     res = ridgecv_boost(A_tag, alphas, m=m, k=100)
     A, b = A_tag[:, 0:d], A_tag[:, d]
@@ -118,5 +118,17 @@ def test_lassocv_boost_correctness():
     m = 10
     res = lassocv_boost(A_tag, alphas, m=m, k=100)
     A, b = A_tag[:, 0:d], A_tag[:, d]
-    res2 = LassoCV(alphas=alphas, cv=m).fit(A,b)
+    res2 = LassoCV(alphas=alphas, cv=m).fit(A, b)
+    assert approx(res.coef_, abs=1e-4) == res2.coef_
+
+
+def test_elasticcv_boost_correctness():
+    d = 2
+    A_tag = get_dummy_data(n=100000)
+    alphas = (0.1, 1, 10, 100, 1000)
+    m = 10
+    rho = 0.5
+    res = elasticcv_boost(A_tag, m=m, alphas=alphas, rho=rho, k=100)
+    A, b = A_tag[:, 0:d], A_tag[:, d]
+    res2 = ElasticNetCV(alphas=alphas, cv=m).fit(A, b)
     assert approx(res.coef_, abs=1e-4) == res2.coef_
