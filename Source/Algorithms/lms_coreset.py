@@ -1,6 +1,6 @@
 import numpy as np
 
-from caratheodory import caratheodory_matrix
+from Source.Algorithms.caratheodory import caratheodory_matrix
 
 
 def lms_coreset(A_tag, m, k):

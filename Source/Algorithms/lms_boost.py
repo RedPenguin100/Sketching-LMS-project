@@ -2,7 +2,7 @@ import numpy as np
 from scipy.linalg import lstsq
 from sklearn.linear_model import RidgeCV, LassoCV, ElasticNetCV
 
-from lms_coreset import lms_coreset
+from Source.Algorithms.lms_coreset import lms_coreset
 
 
 def linreg_boost(A_tag, m, k):

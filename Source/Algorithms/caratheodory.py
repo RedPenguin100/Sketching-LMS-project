@@ -30,6 +30,7 @@ def caratheodory_alg(P, u, n, d, indexes=None):
         P = np.array(P)
     S = P
     w = u
+
     while n > d + 1:
         # Find v
         almost_v = np.zeros(n - 1)
@@ -143,8 +144,16 @@ def caratheodory_matrix(A, k):
     S = np.empty((np.power(d, 2) + 1, d))
     minimum = np.min([np.power(d, 2) + 1, n])
     if minimum == n:
-        print("d^2 + 1 is not smaller than n")
+        print("\nWARNING: d^2 + 1 is not smaller than n")
 
     for i in range(minimum):
         S[i] = np.sqrt(n * w[i]) * A[indexes[i]]
     return S
+
+
+def get_optimal_k_value(d):
+    """
+    :NOTE: this is optimal according to the authors.
+    """
+    d_tag = d + 1
+    return 2 * d_tag * d_tag + 2

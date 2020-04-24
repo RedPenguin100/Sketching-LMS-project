@@ -1,14 +1,17 @@
 import pytest
 import sys
 import numpy as np
+import scipy
 
 from pytest import approx
 from sklearn.linear_model import RidgeCV, LassoCV, ElasticNetCV
 
-from caratheodory import caratheodory_alg, _calculate_weighted_mean, fast_caratheodory, caratheodory_matrix
-from data_generator import get_dummy_data
-from lms_boost import linreg_boost, ridgecv_boost, lassocv_boost, elasticcv_boost
-from lms_coreset import lms_coreset
+from Source.Algorithms.caratheodory import caratheodory_alg, _calculate_weighted_mean, fast_caratheodory, caratheodory_matrix, \
+    get_optimal_k_value
+from Source.Utils.data_generator import get_easy_data
+from Source.Utils.dataset_handler import get_dataset, SECOND_DATASET_PATH, THIRD_DATASET_PATH, FIRST_DATASET_PATH
+from Source.Algorithms.lms_boost import linreg_boost, ridgecv_boost, lassocv_boost, elasticcv_boost
+from Source.Algorithms.lms_coreset import lms_coreset
 
 sys.setrecursionlimit(1000000)
 
@@ -88,28 +91,27 @@ def test_lms_coreset_bad_k_value():
 
 def test_linreg_boost_correctness():
     d = 2
-    A_tag = get_dummy_data()
+    A_tag = get_easy_data()
     x_fast = linreg_boost(A_tag, m=1, k=100)[0]
     A, b = A_tag[:, 0:d], A_tag[:, d]
     x = np.linalg.lstsq(A, b)[0]
-    assert approx(x_fast[0], abs=1e-4) == x[0]
+    assert approx(x_fast[0]) == x[0]
 
 
 def test_ridgecv_boost_correctness():
     d = 2
-    A_tag = get_dummy_data(n=100000)
-    alphas = (0.1, 1, 10, 100, 1000)
+    A_tag = get_easy_data()
+    alphas = [0.1, 1, 10]
     m = 10
     res = ridgecv_boost(A_tag, alphas, m=m, k=100)
     A, b = A_tag[:, 0:d], A_tag[:, d]
     res2 = RidgeCV(alphas=alphas, cv=m).fit(A, b)
-    # TODO: give better data for improved numerical stability for this problem
-    assert approx(res.coef_, abs=0.1) == res2.coef_
+    assert approx(res.coef_) == res2.coef_
 
 
 def test_lassocv_boost_correctness():
     d = 2
-    A_tag = get_dummy_data(n=100000)
+    A_tag = get_easy_data()
     alphas = (0.1, 1, 10, 100, 1000)
     m = 10
     res = lassocv_boost(A_tag, alphas, m=m, k=100)
@@ -120,11 +122,34 @@ def test_lassocv_boost_correctness():
 
 def test_elasticcv_boost_correctness():
     d = 2
-    A_tag = get_dummy_data(n=100000)
+    A_tag = get_easy_data()
     alphas = (0.1, 1, 10, 100, 1000)
     m = 10
     rho = 0.5
     res = elasticcv_boost(A_tag, m=m, alphas=alphas, rho=rho, k=100)
     A, b = A_tag[:, 0:d], A_tag[:, d]
-    res2 = ElasticNetCV(alphas=alphas, cv=m).fit(A, b)
+    res2 = ElasticNetCV(alphas=alphas, cv=m, l1_ratio=rho).fit(A, b)
     assert approx(res.coef_, abs=1e-4) == res2.coef_
+
+
+@pytest.mark.parametrize('dataset', [FIRST_DATASET_PATH, SECOND_DATASET_PATH])
+def test_linreg_datasets(dataset):
+    A_tag = get_dataset(dataset)
+    (n, d_tag) = A_tag.shape
+    d = d_tag - 1
+    k = get_optimal_k_value(d)
+    x_fast = linreg_boost(A_tag, m=1, k=k * 10)[0]
+    x = scipy.linalg.lstsq(A_tag[:, 0:d], A_tag[:, d])[0]
+    assert approx(x_fast[0]) == x[0]
+
+
+# TODO: numerical problems in dataset 3
+@pytest.mark.xfail
+def test_linreg_third_dataset():
+    A_tag = get_dataset(THIRD_DATASET_PATH)
+    (n, d_tag) = A_tag.shape
+    d = d_tag - 1
+    k = get_optimal_k_value(d)
+    x_fast = linreg_boost(A_tag, m=1, k=k * 10)[0]
+    x = scipy.linalg.lstsq(A_tag[:, 0:d], A_tag[:, d])[0]
+    assert approx(x_fast[0], rel=1e-4) == x[0]
