@@ -86,7 +86,7 @@ def test_lms_coreset_bad_k_value():
         C, y = lms_coreset(np.concatenate((A, b)), m=2, k=2)
 
 
-def test_linred_boost_correctness():
+def test_linreg_boost_correctness():
     d = 2
     A_tag = get_dummy_data()
     x_fast = linreg_boost(A_tag, m=1, k=100)[0]
