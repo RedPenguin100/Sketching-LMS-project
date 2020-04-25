@@ -140,7 +140,7 @@ def test_linreg_datasets(dataset):
     k = get_optimal_k_value(d)
     x_fast = linreg_boost(A_tag, m=1, k=k * 10)[0]
     x = scipy.linalg.lstsq(A_tag[:, 0:d], A_tag[:, d])[0]
-    assert approx(x_fast[0]) == x[0]
+    assert approx(x_fast) == x
 
 
 # TODO: numerical problems in dataset 3
