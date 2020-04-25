@@ -95,7 +95,7 @@ def test_linreg_boost_correctness():
     x_fast = linreg_boost(A_tag, m=1, k=100)[0]
     A, b = A_tag[:, 0:d], A_tag[:, d]
     x = scipy.linalg.lstsq(A, b)[0]
-    assert approx(x_fast[0]) == x[0]
+    assert approx(x_fast) == x
 
 
 def test_ridgecv_boost_correctness():
