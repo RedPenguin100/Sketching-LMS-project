@@ -94,7 +94,7 @@ def test_linreg_boost_correctness():
     A_tag = get_easy_data()
     x_fast = linreg_boost(A_tag, m=1, k=100)[0]
     A, b = A_tag[:, 0:d], A_tag[:, d]
-    x = np.linalg.lstsq(A, b)[0]
+    x = scipy.linalg.lstsq(A, b)[0]
     assert approx(x_fast[0]) == x[0]
 
 
