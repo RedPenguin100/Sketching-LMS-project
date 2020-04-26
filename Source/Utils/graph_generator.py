@@ -1,3 +1,8 @@
+import numpy as np
+from matplotlib.ticker import MaxNLocator
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits import mplot3d
+
 import matplotlib.pyplot as plt
 
 
@@ -93,9 +98,46 @@ def plot_all_algs_third_performance(result_dict, dataset):
     plt.show()
 
 
-# result_dict = parse_first_performance('..\\..\\Tests\\FIRST_PERFORMANCE_TEST_RESULTS.txt')
-result_dict = parse_third_performance('..\\..\\Tests\\THIRD_PERFORMANCE_TEST_RESULTS.txt')
-plot_all_algs_third_performance(result_dict, '3D_spatial_network')
-plot_all_algs_third_performance(result_dict, 'household_power_consumption')
-# plot_two_algorithms(result_dict, 'ridge', 'Data size n', 'Computation time (seconds)', '|alphas|')
-# plot_two_algorithms(result_dict, 'lasso', 'Data size n', 'Computation time (seconds)', '|alphas|')
+def parse_linreg_performance(file_path):
+    with open(file_path, 'r') as f:
+        data = f.read().split()
+    result_dict = {'linreg': ([], [], []),
+                   'linreg_boost': ([], [], [])}
+    for line in data:
+        split_line = line.split(sep=',')
+        alg, n, d, duration = split_line
+        n_s, d_s, durations = result_dict[alg]
+        n_s.append(int(n))
+        d_s.append(int(d))
+        durations.append(float(duration))
+        result_dict[alg] = (n_s, d_s, durations)
+    return result_dict
+
+
+def plot_linreg_performance(result_dict):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    for algorithm, results in result_dict.items():
+        if 'boost' in algorithm:
+            (n_s, d_s, durations) = results
+            ax.scatter(n_s, d_s, durations, marker='o', label=algorithm)
+        else:
+            (n_s, d_s, durations) = results
+            ax.scatter(n_s, d_s, durations, marker='^', label=algorithm)
+        # else:
+        #     ax.plot(x, y, '^', label=algorithm)
+    legend = ax.legend(loc='upper left', shadow=True, fontsize='x-large',
+                       prop={'size': 11})
+
+    plt.xlabel('Amount of Data n')
+    plt.ylabel('Dimension d')
+    ax.set_zlabel('Duration(seconds)')
+    plt.show()
+
+
+result_dict = parse_linreg_performance('..\\..\\Tests\\LINREG_PERFORMANCE_TEST_D_VALUES_very_large.txt')
+plot_linreg_performance(result_dict)
+result_dict = parse_linreg_performance('..\\..\\Tests\\LINREG_PERFORMANCE_TEST_D_VALUES_night_run.txt')
+plot_linreg_performance(result_dict)
+result_dict = parse_linreg_performance('..\\..\\Tests\\LINREG_PERFORMANCE_TEST_D_VALUES_large_values.txt')
+plot_linreg_performance(result_dict)
