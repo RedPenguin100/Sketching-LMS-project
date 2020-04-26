@@ -29,6 +29,10 @@ def get_easy_data(n=1000000):
 
 
 def get_varying_d_data(d, n=1000000):
+    """
+    Function creates data for n,d shapes and adds a little bit
+    of noise to the solution which we set to be np.arange(d).
+    """
     A = np.empty((n, d + 1))
     rand = np.random.uniform(size=(n, d))
     A[:, :d] = rand

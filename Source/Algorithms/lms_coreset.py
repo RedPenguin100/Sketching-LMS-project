@@ -4,14 +4,6 @@ from Source.Algorithms.caratheodory import caratheodory_matrix
 
 
 def lms_coreset(A_tag, m, k):
-    """
-    TODO: write documentation
-    :param A_tag:
-    :param b:
-    :param m:
-    :param k:
-    :return:
-    """
     (n, d_tag) = A_tag.shape
     d = d_tag - 1 # A_tag is n x (d + 1)
     A_block_list = np.array_split(A_tag, m)  # Each block with size at most n // m + 1

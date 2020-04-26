@@ -2,22 +2,7 @@ import numpy as np
 from scipy.linalg import null_space
 
 
-def _calculate_weighted_mean(P: list, u):
-    weight = 0.
-    for i in range(len(P)):
-        weight += u[i] * P[i]
-    return weight
-
-
 def caratheodory_alg(P, u, n, d, indexes=None):
-    """
-    Returns a smaller weighted set as described in caratheodory theorem.
-    :param P: list of n points in R^d
-    :param u: a list that represents a function that maps each point in P to a positive real value.
-              will contain the correct value of the ith point in P, in the ith place.
-    :return: A caratheodory set (S,w)
-    :note: Running time: O(n^2d^2)
-    """
     if indexes is None:
         indexes = np.arange(n)
     if n == 0:
@@ -42,7 +27,7 @@ def caratheodory_alg(P, u, n, d, indexes=None):
         alpha = np.min(w[v_cond] / v[v_cond])
         w = w - alpha * v
 
-        cond = w > 10e-18  # we don't write 0 to avoid numerical instability
+        cond = w > 10e-18  # we don't write 0 to avoid numerical instability mistakes
         S, indexes, w = S[cond], indexes[cond], w[cond]
         n = len(S)
     return S, w, indexes
@@ -68,14 +53,8 @@ def get_mus_utag(P_partitions, u_partitions):
 
 def fast_caratheodory(P, u, k, indexes=None):
     """
-    Returns a smaller weighted set as described in caratheodory theorem,
-    using a fast algorithm O(nd).
-    :param P: list of n points in R^d
-    :param u: a list that represents a function that maps each point in P to a positive real value.
-              will contain the correct value of the ith point in P, in the ith place.
-    :param k: an integer between 1 and n for accuracy / speed trade-off.
-    :return: A caratheodory set (S,w)
-    :note: we assume the points are unique
+    :note: we assume the points are unique(If they are not,
+           we may just remove the duplicates and receive a similar result)
     """
     n = len(P)
     if indexes is None:
@@ -91,7 +70,7 @@ def fast_caratheodory(P, u, k, indexes=None):
     d = len(P[0])
     if n <= d + 1:
         return P, u, indexes
-    if k > n:  # TODO: decide on the best way to fix this.
+    if k > n:  # This happens sometimes in the recursion so we don't want to throw here.
         k = n
     if k < 1:
         raise ValueError()
@@ -123,15 +102,6 @@ def fast_caratheodory(P, u, k, indexes=None):
 
 
 def caratheodory_matrix(A, k):
-    """
-    Performs algorithm 3 as described in the article, receiving data
-    and returning a manipulated "compressed" data.
-    :param A: matrix of dimensions n * d
-    :param k: accuracy / speed trade-off, integer from 1 to n
-    :return: A matrix S of dimensions (d ^ 2 + 1) * d and
-             A^t A == S^t S
-    # TODO: implement / handle case where d^2+1 > n
-    """
     if len(A.shape) != 2:
         raise ValueError("Expected A to be matrix, got A with shape: {}".format(A.shape))
     (n, d) = A.shape
@@ -153,7 +123,7 @@ def caratheodory_matrix(A, k):
 
 def get_optimal_k_value(d):
     """
-    :NOTE: this is optimal according to the authors.
+    :note: this is optimal according to the authors.
     """
     d_tag = d + 1
     return 2 * d_tag * d_tag + 2

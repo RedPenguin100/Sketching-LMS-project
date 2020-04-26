@@ -6,7 +6,8 @@ import scipy
 from pytest import approx
 from sklearn.linear_model import RidgeCV, LassoCV, ElasticNetCV
 
-from Source.Algorithms.caratheodory import caratheodory_alg, _calculate_weighted_mean, fast_caratheodory, caratheodory_matrix, \
+from Source.Algorithms.caratheodory import caratheodory_alg, fast_caratheodory, \
+    caratheodory_matrix, \
     get_optimal_k_value
 from Source.Utils.data_generator import get_easy_data, get_varying_d_data
 from Source.Utils.dataset_handler import get_dataset, SECOND_DATASET_PATH, THIRD_DATASET_PATH, FIRST_DATASET_PATH
@@ -14,6 +15,13 @@ from Source.Algorithms.lms_boost import linreg_boost, ridgecv_boost, lassocv_boo
 from Source.Algorithms.lms_coreset import lms_coreset
 
 sys.setrecursionlimit(1000000)
+
+
+def _calculate_weighted_mean(P: list, u):
+    weight = 0.
+    for i in range(len(P)):
+        weight += u[i] * P[i]
+    return weight
 
 
 def test_caratheodory():
@@ -60,7 +68,6 @@ def test_fast_caratheodory():
 def test_caratheodory_matrix():
     A = np.array([[0, 1], [0, 0], [1, 1], [1, 0],
                   [-1, 0]
-                  # , [-1, 1], [0, -1], [1, -1]
                   ])
     (n, d) = A.shape
     S = caratheodory_matrix(A, k=4)
@@ -69,7 +76,6 @@ def test_caratheodory_matrix():
     assert np.linalg.norm(np.matmul(S.transpose(), S) - np.matmul(A.transpose(), A)) == 0
 
 
-# TODO: add better test for lms_coreset
 def test_lms_coreset():
     A = np.array([[0, 1], [0, 0], [1, 1], [1, 0],
                   [-1, 0], [2, 0], [3, 0], [4, 0],
@@ -144,13 +150,14 @@ def test_linreg_datasets_accuracy(dataset):
     print(err)
     print(err / np.linalg.norm(x))
 
+
 @pytest.mark.parametrize('dataset', [FIRST_DATASET_PATH, SECOND_DATASET_PATH, THIRD_DATASET_PATH])
 def test_ridge_datasets_accuracy(dataset):
     A_tag = get_dataset(dataset)
     (n, d_tag) = A_tag.shape
     alphas = (0.1, 1, 10, 100, 1000)
     d = d_tag - 1
-    m=64
+    m = 64
     k = get_optimal_k_value(d)
     result_fast = ridgecv_boost(A_tag, alphas=alphas, m=m, k=k)
     result = RidgeCV(alphas=alphas, cv=m).fit(A_tag[:, 0:d], A_tag[:, d])
@@ -165,7 +172,7 @@ def test_lasso_datasets_accuracy(dataset):
     (n, d_tag) = A_tag.shape
     alphas = (0.1, 1, 10, 100, 1000)
     d = d_tag - 1
-    m=64
+    m = 64
     k = get_optimal_k_value(d)
     result_fast = lassocv_boost(A_tag, alphas=alphas, m=m, k=k)
     result = LassoCV(alphas=alphas, cv=m).fit(A_tag[:, 0:d], A_tag[:, d])
@@ -180,12 +187,11 @@ def test_elastic_datasets_accuracy(dataset):
     (n, d_tag) = A_tag.shape
     alphas = (0.1, 1, 10, 100, 1000)
     d = d_tag - 1
-    m=2
+    m = 2
     k = get_optimal_k_value(d)
-    rho=0.5
+    rho = 0.5
     result_fast = elasticcv_boost(A_tag, alphas=alphas, m=m, k=k, rho=rho)
     result = ElasticNetCV(alphas=alphas, cv=m, l1_ratio=rho).fit(A_tag[:, 0:d], A_tag[:, d])
     err = np.linalg.norm(result_fast.coef_ - result.coef_)
     print(err)
     print(err / np.linalg.norm(result.coef_))
-
