@@ -1,10 +1,11 @@
 import numpy as np
 import pytest
+import scipy
 
 from sklearn.linear_model import RidgeCV, LassoCV, ElasticNetCV
 
 from Source.Algorithms.caratheodory import get_optimal_k_value
-from Source.Algorithms.lms_boost import ridgecv_boost, lassocv_boost, elasticcv_boost
+from Source.Algorithms.lms_boost import ridgecv_boost, lassocv_boost, elasticcv_boost, linreg_boost
 from Source.Utils.data_generator import get_varying_d_data
 from Source.Utils.dataset_handler import SECOND_DATASET_PATH, FIRST_DATASET_PATH, get_dataset
 from Source.Utils.measurement import measure_method
@@ -108,3 +109,17 @@ def test_time_for_increasing_alphas(dataset, dataset_name, alpha_count):
         f.write("elastic_boost,{dataset_name},{alpha_count},{duration}\n".format(dataset_name=dataset_name,
                                                                                  alpha_count=alpha_count,
                                                                                  duration=elastic_boost_mes.duration))
+
+@pytest.mark.parametrize('n', np.arange(start=1000000, stop=10000000, step=2500000))
+@pytest.mark.parametrize('d', [15])
+def test_linreg_various_values(n, d):
+    m = 64
+    A_tag = get_varying_d_data(d, n)
+    n, d_tag = A_tag.shape
+    d = d_tag - 1
+    linreg_mes = measure_method(scipy.linalg.lstsq, A_tag[:, :d], A_tag[:, d])
+    linreg_boost_mes = measure_method(linreg_boost, A_tag, m, get_optimal_k_value(d))
+
+    with open('LINREG_PERFORMANCE_TEST_D_VALUES_very_large.txt', 'a+') as f:
+        f.write("linreg,{n},{d},{duration}\n".format(n=n, d=d, duration=linreg_mes.duration))
+        f.write("linreg_boost,{n},{d},{duration}\n".format(n=n, d=d, duration=linreg_boost_mes.duration))
